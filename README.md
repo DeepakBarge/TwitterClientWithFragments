@@ -2,7 +2,16 @@
 
 **Twitter with Fragments** is an android app that allows a user to view home and mentions timelines, view user profiles with user timelines, as well as compose and post a new tweet. The app utilizes [Twitter REST API](https://dev.twitter.com/rest/public).
 
-Time spent: **X** hours spent in total
+## Video Walkthrough
+
+Here's a walkthrough of implemented user stories:
+
+GIF created with [LiceCap](http://www.cockos.com/licecap/).
+
+![demo](demo1.gif)
+![demo](demo2.gif)
+
+Time spent: **28** hours spent in total
 
 ## User Stories
 
@@ -43,14 +52,6 @@ The following **additional** features are implemented:
 * [x] Ability to follow/unfollow other users
 * [x] Ability to view favourites, media/images on profile view of a user
 * [x] Ability to reply from the timeline view
-
-## Video Walkthrough 
-
-Here's a walkthrough of implemented user stories:
-
-<img src='http://i.imgur.com/link/to/your/gif/file.gif' title='Video Walkthrough' width='' alt='Video Walkthrough' />
-
-GIF created with [LiceCap](http://www.cockos.com/licecap/).
 
 ## Notes
 
