@@ -10,6 +10,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v4.view.ViewPager;
@@ -17,25 +18,38 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import com.astuetz.PagerSlidingTabStrip;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.BitmapImageViewTarget;
 import com.codepath.apps.twitfeeder.R;
 import com.codepath.apps.twitfeeder.fragments.HomeTimelineTweetsFragment;
-import com.codepath.apps.twitfeeder.fragments.MentionsTimelineTweetsFragment;
 import com.codepath.apps.twitfeeder.fragments.UserFavouritesListFragment;
+import com.codepath.apps.twitfeeder.fragments.UserFollowerListFragment;
+import com.codepath.apps.twitfeeder.fragments.UserFollowingListFragment;
 import com.codepath.apps.twitfeeder.fragments.UserTimelineMediaFragment;
 import com.codepath.apps.twitfeeder.models.User;
-
+import com.codepath.apps.twitfeeder.net.TwitApplication;
+import com.codepath.apps.twitfeeder.net.TwitterRestClient;
+import com.codepath.apps.twitfeeder.utils.ApplicationHelper;
+import com.loopj.android.http.JsonHttpResponseHandler;
+import org.apache.http.Header;
+import org.json.JSONException;
+import org.json.JSONObject;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
 public class UserProfileDetailsActivity extends AppCompatActivity {
 
     public User user;
+
+    private TwitterRestClient client;
+
+    public boolean isFollowing = false;
+
+    public boolean  isFollowed = false;
 
     @Bind(R.id.profile) ImageView mProfileImage;
     @Bind(R.id.toolbar) Toolbar mToolbar;
@@ -45,10 +59,11 @@ public class UserProfileDetailsActivity extends AppCompatActivity {
     @Bind(R.id.description) TextView mDescription;
     @Bind(R.id.followersCount) TextView mFollowersCount;
     @Bind(R.id.followingCount) TextView mFollowingCount;
+    @Bind(R.id.bAddUser) Button mAddUser;
 
     public class UserProfilePagerAdapter extends FragmentPagerAdapter {
 
-        String tabs [] = {"Tweets", "Photos", "Favourites"};
+        String tabs [] = {"Tweets", "Photos", "Favourites", "Followers", "Following"};
 
         public UserProfilePagerAdapter(FragmentManager fm) {
             super(fm);
@@ -67,6 +82,12 @@ public class UserProfileDetailsActivity extends AppCompatActivity {
                 case 2:
                     return tabs[2];
 
+                case 3:
+                    return tabs[3];
+
+                case 4:
+                    return tabs[4];
+
                 default:
                     return "";
             }
@@ -82,6 +103,7 @@ public class UserProfileDetailsActivity extends AppCompatActivity {
         public Fragment getItem(int position) {
 
             switch (position){
+
                 case 0:
                     return HomeTimelineTweetsFragment.newInstance(user.getUserId());
                     //break;
@@ -92,7 +114,15 @@ public class UserProfileDetailsActivity extends AppCompatActivity {
 
                 case 2:
                     return UserFavouritesListFragment.newInstance(user.getUserId());
-                    //break;
+                //break;
+
+                case 3:
+                    return UserFollowerListFragment.newInstance(user.getUserId());
+                //break;
+
+                case 4:
+                    return UserFollowingListFragment.newInstance(user.getUserId());
+                //break;
 
                 default:
                     return null;
@@ -114,9 +144,16 @@ public class UserProfileDetailsActivity extends AppCompatActivity {
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        client = TwitApplication.getRestClient();
+
         Intent intent = getIntent();
 
         user = intent.getParcelableExtra("user");
+
+        // never check if its the owner's profile
+        if(ApplicationHelper.getOwner().getUserId() != user.getUserId()) {
+            findUserRelationship();
+        }
 
         CollapsingToolbarLayout collapsingToolbar =
                 (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
@@ -155,12 +192,104 @@ public class UserProfileDetailsActivity extends AppCompatActivity {
         PagerSlidingTabStrip tabs = (PagerSlidingTabStrip) findViewById(R.id.tabs);
         tabs.setViewPager(pager);
 
-        tabs.setIndicatorHeight(4);
+        tabs.setIndicatorHeight(6);
         tabs.setIndicatorColor(0xFF55ACEE);
         tabs.setTextColor(0xFF55ACEE);
+
+        mAddUser.setVisibility(View.INVISIBLE);
+
+        mAddUser.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.i("info","toggle user clicked");
+                toggleUserRelationship();
+            }
+        });
     }
 
-    /* this method is overridden to prevent the UP/BACK button from creating a new activity
+    public void toggleUserRelationship(){
+
+        if(isFollowing) {
+
+            client.unFollowUser(user.getUserId(), new JsonHttpResponseHandler() {
+
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+
+                    //mAddUser.setVisibility(View.VISIBLE);
+                    mAddUser.setBackground(ContextCompat.getDrawable(UserProfileDetailsActivity.this, R.drawable.button_hollow));
+                    mAddUser.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_add_user_filled, 0, 0, 0);
+                    isFollowing = false;
+                    Log.i("info", "Successful call to unfollow user");
+                }
+
+                @Override
+                public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+
+                }
+
+            });
+
+        } else {
+
+            client.followUser(user.getUserId(), new JsonHttpResponseHandler() {
+
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+
+                    //mAddUser.setVisibility(View.VISIBLE);
+                    mAddUser.setBackground(ContextCompat.getDrawable(UserProfileDetailsActivity.this, R.drawable.button_filled));
+                    mAddUser.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_user_added, 0, 0, 0);
+                    isFollowing = true;
+                    Log.i("info", "Successful call to follow user");
+
+                }
+
+                @Override
+                public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+
+                }
+
+            });
+        }
+    }
+
+    public void findUserRelationship() {
+
+        Log.i("info", "name: "+ApplicationHelper.getOwner().getName());
+
+        client.getFriendshipStatus(ApplicationHelper.getOwner().getUserId(), user.getUserId(), new JsonHttpResponseHandler(){
+
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+
+                mAddUser.setVisibility(View.VISIBLE);
+
+                Log.i("info","Successful call to get user relation");
+                Log.i("info","Relation: "+response.toString());
+                try {
+                    isFollowing = response.getJSONObject("relationship").getJSONObject("source").getBoolean("following");
+                    if(isFollowing){
+                        Log.i("info","Following this user");
+                        mAddUser.setBackground(ContextCompat.getDrawable(UserProfileDetailsActivity.this, R.drawable.button_filled));
+                        mAddUser.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_user_added, 0, 0, 0);
+                    }
+                    isFollowed = response.getJSONObject("relationship").getJSONObject("source").getBoolean("followed_by");
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+
+            }
+        });
+    }
+
+    /* this method is overridden to prevent the UP/BACK button_hollow from creating a new activity
 instead of showing the old activity */
     @Override
     public Intent getSupportParentActivityIntent() {

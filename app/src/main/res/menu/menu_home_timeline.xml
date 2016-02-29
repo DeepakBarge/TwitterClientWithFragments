@@ -11,10 +11,26 @@
           app:actionViewClass="android.support.v7.widget.SearchView" />
 
     <item
+        android:id="@+id/action_profile"
+        android:orderInCategory="300"
+        android:title="@string/action_profile"
+        android:icon="@drawable/ic_user_profile"
+        app:showAsAction="ifRoom">
+    </item>
+
+    <item
+        android:id="@+id/action_messages"
+        android:orderInCategory="200"
+        android:title="@string/action_messages"
+        android:icon="@drawable/ic_user_messages"
+        app:showAsAction="ifRoom">
+    </item>
+
+    <item
         android:id="@+id/miActionProgress"
         android:title="Loading..."
         android:visible="false"
-        android:orderInCategory="100"
+        android:orderInCategory="400"
         app:showAsAction="ifRoom"
         app:actionLayout="@layout/action_view_progress" />
 

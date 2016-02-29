@@ -5,14 +5,10 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -37,7 +33,7 @@ public class TweetDetailsActivity extends AppCompatActivity implements View.OnCl
     @Bind(R.id.toolbar) Toolbar toolbar;
     @Bind(R.id.tvName) TextView mUserName;
     @Bind(R.id.tvScreenName) TextView mScreenName;
-    @Bind(R.id.tvTweetText) TextView mTweetText;
+    @Bind(R.id.tvDescription) TextView mTweetText;
     @Bind(R.id.tvDate) TextView mDate;
     @Bind(R.id.tvRetweetsCount) TextView mRetweetsCount;
     @Bind(R.id.tvFavouritesCount) TextView mFavouritesCount;
@@ -165,7 +161,7 @@ public class TweetDetailsActivity extends AppCompatActivity implements View.OnCl
         }
     }
 
-    /* this method is overridden to prevent the UP/BACK button from creating a new activity
+    /* this method is overridden to prevent the UP/BACK button_hollow from creating a new activity
    instead of showing the old activity */
     @Override
     public Intent getSupportParentActivityIntent() {

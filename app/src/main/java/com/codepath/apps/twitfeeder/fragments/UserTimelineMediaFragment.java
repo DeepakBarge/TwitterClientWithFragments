@@ -161,7 +161,7 @@ public class UserTimelineMediaFragment extends Fragment{
 
     private void getTimeline(final long sinceId, final long maxId, final int operation) {
 
-        client.getHomeTimeline(sinceId, maxId, userID, new JsonHttpResponseHandler() {
+        client.getHomeTimeline(sinceId, maxId, userID, null, new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
 

@@ -73,7 +73,7 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder> 
         @Nullable @Bind(R.id.ivMedia) ImageView mMedia;
         @Bind(R.id.tvScreenName) TextView mScreenName;
         @Bind(R.id.tvRelativeTimestamp) TextView mRelativeTimestamp;
-        @Bind(R.id.tvTweetText) TextView mTweetText;
+        @Bind(R.id.tvDescription) TextView mTweetText;
         @Bind(R.id.llMediaContainer) LinearLayout mMediaContainer;
         @Bind(R.id.favouriteCount) TextView mFavouriteCount;
         @Bind(R.id.retweetCount) TextView mRetweetCount;
@@ -119,7 +119,13 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder> 
 
                 case R.id.retweet:
                     Log.i("info", "Received retwt click " + String.valueOf(position));
-                    listener.onRetweetButtonClicked(tweets.get(position).getTweetId(), position);
+                    if(ApplicationHelper.getOwner().getUserId() != tweets.get(position).getUserId()) {
+                        if (!tweets.get(position).isRetweeted()) {
+                            listener.onRetweetButtonClicked(tweets.get(position).getTweetId(), position);
+                        }
+                    } else {
+                        Log.i("info","cannot retweet your tweet");
+                    }
                     break;
 
                 case R.id.reply:

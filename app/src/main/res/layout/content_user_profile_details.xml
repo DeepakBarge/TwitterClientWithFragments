@@ -46,16 +46,25 @@
             android:layout_marginTop="5dp"
             android:textSize="12sp"/>
 
-        <ImageView
+        <!--ImageView
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:id="@+id/addUser"
             android:layout_alignTop="@+id/name"
-            android:layout_marginRight="5dp"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true"
-            android:src="@drawable/ic_action_composetweet"/>
+            android:layout_marginLeft="40dp"
+            android:layout_toRightOf="@+id/name"
+            android:src="@drawable/ic_add_user"/-->
 
+        <Button
+            android:id="@+id/bAddUser"
+            android:layout_alignTop="@+id/name"
+            android:layout_marginLeft="40dp"
+            android:layout_toRightOf="@+id/name"
+            android:drawableLeft="@drawable/ic_add_user_filled"
+            android:layout_width="35dp"
+            android:layout_height="25dp"
+            android:background="@drawable/button_hollow"
+            android:paddingLeft="5dp"/>
 
     </RelativeLayout>
 
@@ -120,6 +129,6 @@
     android:id="@+id/viewpager"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@android:color/white" />
+    android:background="#b3bbc5" />
 
 </LinearLayout>

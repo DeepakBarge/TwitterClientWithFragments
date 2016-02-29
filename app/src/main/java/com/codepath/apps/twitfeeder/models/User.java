@@ -9,9 +9,11 @@ import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
 import com.activeandroid.query.Select;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Table(name = "User")
@@ -53,15 +55,17 @@ public class User extends Model implements Parcelable {
     }
 
 
-    public static List<User> getDBUsers() {
+    public static ArrayList<User> getDBUsers() {
         // This is how you execute a query
 
-        return new Select().all().from(User.class).execute();
+        ArrayList<User> temp = new ArrayList(new Select().all().from(User.class).execute());
         /*return new Select()
                 .from(Tweet.class)
                 .where("Category = ?", category.getId())
                 .orderBy("Name ASC")
                 .execute();*/
+
+        return temp;
     }
 
 
@@ -160,6 +164,23 @@ public class User extends Model implements Parcelable {
             e.printStackTrace();
         }
         return user;
+    }
+
+    public static ArrayList<User> getAllUsers(JSONArray jsonArray){
+        ArrayList<User> users = new ArrayList<>();
+        for(int i=0; i<jsonArray.length(); i++){
+            try {
+                JSONObject userJSON = jsonArray.getJSONObject(i);
+                User u = fromJSON(userJSON);
+                if(u != null) {
+                    users.add(u);
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+                continue;
+            }
+        }
+        return users;
     }
 
     public static User getUser(long userId){

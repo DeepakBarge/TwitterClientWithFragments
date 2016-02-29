@@ -1,6 +1,11 @@
 package com.codepath.apps.twitfeeder.activities;
 
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
@@ -11,28 +16,17 @@ import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
-import android.text.util.Linkify;
 import android.util.Log;
-import android.util.Patterns;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-
 import com.astuetz.PagerSlidingTabStrip;
 import com.codepath.apps.twitfeeder.R;
-import com.codepath.apps.twitfeeder.adapters.TweetAdapter;
-import com.codepath.apps.twitfeeder.fragments.ComposeNewTweetFragment;
+import com.codepath.apps.twitfeeder.adapters.SmartFragmentStatePagerAdapter;
 import com.codepath.apps.twitfeeder.fragments.HomeTimelineTweetsFragment;
 import com.codepath.apps.twitfeeder.fragments.MentionsTimelineTweetsFragment;
-import com.codepath.apps.twitfeeder.fragments.MentionsTimelineTweetsFragment;
-import com.codepath.apps.twitfeeder.fragments.UserFavouritesListFragment;
-import com.codepath.apps.twitfeeder.fragments.UserTimelineMediaFragment;
-import com.codepath.apps.twitfeeder.listeners.EndlessRecyclerViewScrollListener;
-import com.codepath.apps.twitfeeder.models.Tweet;
 import com.codepath.apps.twitfeeder.models.User;
 import com.codepath.apps.twitfeeder.net.TwitApplication;
 import com.codepath.apps.twitfeeder.net.TwitterRestClient;
@@ -40,25 +34,20 @@ import com.codepath.apps.twitfeeder.utils.ApplicationHelper;
 import com.loopj.android.http.JsonHttpResponseHandler;
 
 import org.apache.http.Header;
-import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
 public class HomeTimelineActivity extends AppCompatActivity {
 
-    public class HomeTimelinePagerAdapter extends FragmentPagerAdapter {
+    private TwitterRestClient client;
 
-        String tabs [] = {"Home", "Mentions"};
+    public class HomeTimelinePagerAdapter extends SmartFragmentStatePagerAdapter {
 
+        private String tabs [] = {"Home", "Mentions"};
+
+        //private int tabIcons[] = {R.drawable.ic_home_tab, R.drawable.ic_home_tab, R.drawable.ic_home_tab};
 
         public HomeTimelinePagerAdapter(FragmentManager fm) {
             super(fm);
@@ -77,7 +66,6 @@ public class HomeTimelineActivity extends AppCompatActivity {
                 default:
                     return "";
             }
-            //return (position == 0)? "Home" : "Mentions" ;
         }
 
         @Override
@@ -102,8 +90,8 @@ public class HomeTimelineActivity extends AppCompatActivity {
                 //break;
             }
 
-            //return (position == 0)? HomeTimelineTweetsFragment.newInstance(0) : MentionsTimelineTweetsFragment.newInstance(0) ;
         }
+
     }
 
     @Bind(R.id.toolbar) Toolbar toolbar;
@@ -114,33 +102,41 @@ public class HomeTimelineActivity extends AppCompatActivity {
         setContentView(R.layout.activity_home_timeline);
         ButterKnife.bind(this);
 
+        client = TwitApplication.getRestClient();
+        getUserCredentials();
+
         ViewPager pager = (ViewPager) findViewById(R.id.viewpager);
-        pager.setAdapter(new HomeTimelinePagerAdapter(getSupportFragmentManager()));
+
+        final HomeTimelinePagerAdapter homeTimelinePagerAdapter = new HomeTimelinePagerAdapter(getSupportFragmentManager());
+        pager.setAdapter(homeTimelinePagerAdapter);
 
         // Bind the tabs to the ViewPager
         PagerSlidingTabStrip tabs = (PagerSlidingTabStrip) findViewById(R.id.tabs);
         tabs.setViewPager(pager);
 
-        tabs.setIndicatorHeight(4);
+        tabs.setIndicatorHeight(6);
         tabs.setIndicatorColor(0xFF55ACEE);
         tabs.setTextColor(0xFF55ACEE);
 
         ApplicationHelper.setContext(HomeTimelineActivity.this);
 
         setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle("Timeline");
+        getSupportActionBar().setTitle(" Timeline");
 
         getSupportActionBar().setLogo(R.drawable.ic_twitter_icon);
+        getSupportActionBar().setDisplayUseLogoEnabled(true);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
 
-        fab.setImageResource(R.drawable.ic_action_composetweet);
+        fab.setImageResource(R.drawable.ic_action_composetweet_fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 //Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                 //        .setAction("Action", null).show();
-                //showComposeTweetDialog(0, 0);
+                HomeTimelineTweetsFragment temp = (HomeTimelineTweetsFragment) homeTimelinePagerAdapter.getRegisteredFragment(0);
+
+                temp.showComposeTweetDialog(0,0);
             }
         });
 
@@ -159,7 +155,7 @@ public class HomeTimelineActivity extends AppCompatActivity {
             @Override
             public boolean onQueryTextSubmit(String query) {
 
-                //client.searchTweets();
+                client.searchTweets();
                 // search the tweets searchtweetsfragment.searchTweets();
                 return true;
             }
@@ -171,4 +167,53 @@ public class HomeTimelineActivity extends AppCompatActivity {
         });
         return super.onCreateOptionsMenu(menu);
     }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item){
+
+        switch (item.getItemId()) {
+
+            case R.id.action_profile:
+
+                Intent i = new Intent(HomeTimelineActivity.this, UserProfileDetailsActivity.class);
+                i.putExtra("user", ApplicationHelper.getOwner());
+                (HomeTimelineActivity.this).startActivity(i);
+                (HomeTimelineActivity.this).overridePendingTransition(R.anim.slide_in, R.anim.slide_out);
+                return true;
+
+            case R.id.action_search:
+
+                return true;
+
+            case R.id.action_messages:
+
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+
+        }
+    }
+
+
+    private void getUserCredentials() {
+        client.verifyCredentials(new JsonHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+
+                Log.i("info", "Successful to get credentials " + response.toString());
+                User owner = User.fromJSON(response);
+                Log.i("info", "Owner name: " + owner.getName() + " " + owner.getProfile_image_url());
+                getSupportActionBar().setTitle(" @" + owner.getScreenName());
+                //ApplicationHelper.persistData(adapter.tweets);
+                ApplicationHelper.setOwner(owner);
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+
+            }
+        });
+    }
+
 }

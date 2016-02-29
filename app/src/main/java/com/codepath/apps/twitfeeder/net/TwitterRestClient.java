@@ -39,17 +39,27 @@ public class TwitterRestClient extends OAuthBaseClient {
 		super(context, REST_API_CLASS, REST_URL, REST_CONSUMER_KEY, REST_CONSUMER_SECRET, REST_CALLBACK_URL);
 	}
 
-    public void getHomeTimeline(long since_id, long max_id, long userId, AsyncHttpResponseHandler handler){
+    public void getHomeTimeline(long since_id, long max_id, long userId, String query, AsyncHttpResponseHandler handler){
 
-        String url = userId > 0 ? "statuses/user_timeline.json":"statuses/home_timeline.json";
+        String url="";
+
+        url = userId > 0 ? "statuses/user_timeline.json":"statuses/home_timeline.json";
+
+        if (query != null && query.length() > 0) {
+            url = "search/tweets.json";
+        }
 
         String apiUrl = getApiUrl(url);
 
-        Log.i("info","calling timeline: "+apiUrl);
+        Log.i("info","calling api: "+apiUrl);
 
             //add params
         RequestParams params = new RequestParams();
         params.put("count", 20);
+
+        if (query != null) {
+            params.put("q", query);
+        }
 
         if (userId > 0) {
             params.put("user_id", userId);
@@ -106,10 +116,6 @@ public class TwitterRestClient extends OAuthBaseClient {
         getClient().get(apiUrl, params, handler);
     }
 
-
-    public void searchTweets(){
-
-    }
     public void addFavoriteTweet(long tweetId, AsyncHttpResponseHandler handler) {
         String apiUrl = getApiUrl(REST_ADD_FAVORITES_URL);
         RequestParams params = new RequestParams();
@@ -128,6 +134,24 @@ public class TwitterRestClient extends OAuthBaseClient {
         client.post(apiUrl, params, handler);
     }
 
+    public void followUser(long userId, AsyncHttpResponseHandler handler) {
+        String apiUrl = getApiUrl("friendships/create.json");
+        RequestParams params = new RequestParams();
+        if (userId > 0) {
+            params.put("user_id", userId);
+        }
+        client.post(apiUrl, params, handler);
+    }
+
+    public void unFollowUser(long userId, AsyncHttpResponseHandler handler) {
+        String apiUrl = getApiUrl("friendships/destroy.json");
+        RequestParams params = new RequestParams();
+        if (userId > 0) {
+            params.put("user_id", userId);
+        }
+        client.post(apiUrl, params, handler);
+    }
+
     public void updateStatus(long tweetId, String status, AsyncHttpResponseHandler handler) {
         String apiUrl = getApiUrl(REST_UPDATE_STATUS_URL);
         RequestParams params = new RequestParams();
@@ -136,6 +160,67 @@ public class TwitterRestClient extends OAuthBaseClient {
             params.put("in_reply_to_status_id", tweetId);
         }
         params.put("status", status);
+        client.post(apiUrl, params, handler);
+    }
+
+    // find if the user is followed by another user
+    public void getFriendshipStatus(long source_Id, long target_Id, AsyncHttpResponseHandler handler){
+
+        String apiUrl = getApiUrl("friendships/show.json");
+        RequestParams params = new RequestParams();
+
+        if (source_Id > 0) {
+            params.put("source_id", source_Id);
+        }
+
+        if (target_Id > 0) {
+            params.put("target_id", target_Id);
+        }
+
+        client.get(apiUrl, params, handler);
+    }
+
+    public void getFollowers(long userId, long cursor, AsyncHttpResponseHandler handler){
+        String apiUrl = getApiUrl("followers/list.json");
+
+        RequestParams params = new RequestParams();
+
+        if (userId > 0){
+            params.put("user_id", userId);
+        }
+
+        params.put("cursor", cursor);
+
+        client.get(apiUrl, params, handler);
+
+    }
+
+    public void getFriends(long userId, long cursor, AsyncHttpResponseHandler handler){
+        String apiUrl = getApiUrl("friends/list.json");
+
+        RequestParams params = new RequestParams();
+
+        if (userId > 0){
+            params.put("user_id", userId);
+        }
+
+        params.put("cursor", cursor);
+
+        client.get(apiUrl, params, handler);
+
+    }
+
+    public void reTweet(long tweetId, AsyncHttpResponseHandler handler) {
+
+        String apiUrl = getApiUrl(String.format("statuses/retweet/%s.json", String.valueOf(tweetId)));
+
+        // eg - https://api.twitter.com/1.1/statuses/retweet/241259202004267009.json
+        RequestParams params = new RequestParams();
+/*
+        if (tweetId > 0){
+            params.put("id", tweetId);
+        }
+*/
         client.post(apiUrl, params, handler);
     }
 
@@ -149,6 +234,10 @@ public class TwitterRestClient extends OAuthBaseClient {
     public void verifyCredentials(AsyncHttpResponseHandler handler) {
         String apiUrl = getApiUrl(REST_VERIFY_CREDENTIALS_URL);
         client.get(apiUrl, handler);
+    }
+
+    public void searchTweets(){
+
     }
 
 }

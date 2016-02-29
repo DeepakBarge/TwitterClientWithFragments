@@ -17,6 +17,7 @@ import android.util.Log;
 import com.activeandroid.ActiveAndroid;
 import com.codepath.apps.twitfeeder.R;
 import com.codepath.apps.twitfeeder.models.Tweet;
+import com.codepath.apps.twitfeeder.models.User;
 
 import java.io.IOException;
 import java.text.ParseException;
@@ -29,6 +30,8 @@ public class ApplicationHelper {
 
     public static Context context;
     public static final String TWITTER_DATE_FORMAT = "EEE MMM dd HH:mm:ss ZZZZZ yyyy";
+
+    public static User owner;
 
     public interface AlertDialogListener {
         void onTryAgain();
@@ -66,6 +69,14 @@ public class ApplicationHelper {
                 = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
         return activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting();
+    }
+
+    public static User getOwner() {
+        return owner;
+    }
+
+    public static void setOwner(User user){
+        owner = user;
     }
 
     public static void showWarning(final Context context) {

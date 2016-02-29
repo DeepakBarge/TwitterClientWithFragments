@@ -56,7 +56,7 @@ public class MentionsTimelineTweetsFragment extends Fragment{
     long since_id, max_id;
     LinearLayoutManager linearLayoutManager;
 
-    static User owner = new User();
+    //static User owner = new User();
 
     public static MentionsTimelineTweetsFragment newInstance(int page) {
         Bundle args = new Bundle();
@@ -136,7 +136,7 @@ public class MentionsTimelineTweetsFragment extends Fragment{
         if (!ApplicationHelper.isNetworkAvailable(getContext()) || !ApplicationHelper.isOnline()) {
             ApplicationHelper.showWarning(getContext());
         } else {
-            getUserCredentials();
+            //getUserCredentials();
         }
 
         since_id = 1;
@@ -307,21 +307,4 @@ public class MentionsTimelineTweetsFragment extends Fragment{
     }
 
 
-    private void getUserCredentials() {
-        client.verifyCredentials(new JsonHttpResponseHandler() {
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-
-                Log.i("info","Successful to get credentials "+response.toString());
-                owner = User.fromJSON(response);
-                Log.i("info", "Owner name: " + owner.getName() + " " + owner.getProfile_image_url());
-                //getSupportActionBar().setTitle(" @" + owner.getScreenName());
-                ApplicationHelper.persistData(adapter.tweets);
-            }
-            @Override
-            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
-
-            }
-        });
-    }
 }

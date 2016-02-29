@@ -44,7 +44,6 @@ public class HomeTimelineTweetsFragment extends Fragment implements ComposeNewTw
 
     private TwitterRestClient client;
 
-
     RecyclerView rvTweets;
     SwipeRefreshLayout swipeContainer;
 
@@ -56,7 +55,7 @@ public class HomeTimelineTweetsFragment extends Fragment implements ComposeNewTw
     long since_id, max_id;
     LinearLayoutManager linearLayoutManager;
 
-    static User owner = new User();
+    //static User owner = new User();
 
     public static HomeTimelineTweetsFragment newInstance(long userId) {
         Bundle args = new Bundle();
@@ -136,7 +135,7 @@ public class HomeTimelineTweetsFragment extends Fragment implements ComposeNewTw
         if (!ApplicationHelper.isNetworkAvailable(getContext()) || !ApplicationHelper.isOnline()) {
             ApplicationHelper.showWarning(getContext());
         } else {
-            getUserCredentials();
+            //getUserCredentials();
         }
 
         since_id = 1;
@@ -144,9 +143,9 @@ public class HomeTimelineTweetsFragment extends Fragment implements ComposeNewTw
 
     }
 
-    private void getTimeline(final long sinceId, final long maxId, final int operation) {
+    public void getTimeline(final long sinceId, final long maxId, final int operation) {
 
-        client.getHomeTimeline(sinceId, maxId, userID, new JsonHttpResponseHandler() {
+        client.getHomeTimeline(sinceId, maxId, userID, null, new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
 
@@ -201,7 +200,7 @@ public class HomeTimelineTweetsFragment extends Fragment implements ComposeNewTw
                 Log.i("info", "error: " + errorResponse.toString());
                 try {
 
-                } catch (Exception e){
+                } catch (Exception e) {
 
                 }
             }
@@ -288,8 +287,29 @@ public class HomeTimelineTweetsFragment extends Fragment implements ComposeNewTw
             }
 
             @Override
-            public void onRetweetButtonClicked(long Id, int position) {
+            public void onRetweetButtonClicked(long Id, final int position) {
 
+                client.reTweet(Id, new JsonHttpResponseHandler() {
+
+                    @Override
+                    public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+
+                        Log.i("info", "Retweeted successfully");
+                        adapter.tweets.get(position).setRetweeted(true);
+                        int rcount = adapter.tweets.get(position).getRetweetCount();
+                        adapter.tweets.get(position).setRetweetCount(rcount + 1);
+                        adapter.tweets.get(position).retweetedUser = ApplicationHelper.getOwner();
+                        adapter.notifyItemChanged(position);
+                        ApplicationHelper.persistData(adapter.tweets);
+
+                    }
+
+                    @Override
+                    public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+
+                    }
+
+                });
             }
 
             @Override
@@ -305,7 +325,7 @@ public class HomeTimelineTweetsFragment extends Fragment implements ComposeNewTw
         });
     }
 
-    private void showComposeTweetDialog(final long Id, int pos) {
+    public void showComposeTweetDialog(final long Id, int pos) {
         FragmentManager fm = getActivity().getSupportFragmentManager();
         Tweet t = new Tweet();
         String title = "";
@@ -321,7 +341,7 @@ public class HomeTimelineTweetsFragment extends Fragment implements ComposeNewTw
             title = "Write on timeline";
             //t.setUser(owner);
         }
-        self = owner;
+        self = ApplicationHelper.getOwner();
 
         t.setUser(adapter.tweets.get(pos).getUser());
 
@@ -332,56 +352,6 @@ public class HomeTimelineTweetsFragment extends Fragment implements ComposeNewTw
 
         composeNewTweetFragment.setTargetFragment(HomeTimelineTweetsFragment.this, 300);
 
-/*
-        composeNewTweetFragment.setCustomObjectListener(new ComposeNewTweetFragment.NewTweetDialogListener() {
-
-            @Override
-            public void onFinishPostingTweet(Tweet newTweet) {
-
-                Log.i("info", "Returned from dialog with tweet details");
-
-                String status = newTweet.getTweetText();
-
-                // make POST to new send new tweet
-                // new tweet to the adapter and call notifyItemRangeInserted
-                client.updateStatus(Id, status, new JsonHttpResponseHandler() {
-                    @Override
-                    public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-
-                        Log.i("info", "Successfully posted the tweet " + response.toString());
-
-                        // refresh the timeline to get the new tweet
-                        getTimeline(since_id, 0, REFRESH_OPERATION);
-                        ApplicationHelper.persistData(adapter.tweets);
-                    }
-
-                    @Override
-                    public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
-
-                    }
-                });
-            }
-        });
-*/
-
-    }
-
-    private void getUserCredentials() {
-        client.verifyCredentials(new JsonHttpResponseHandler() {
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-
-                Log.i("info","Successful to get credentials "+response.toString());
-                owner = User.fromJSON(response);
-                Log.i("info", "Owner name: " + owner.getName() + " " + owner.getProfile_image_url());
-                //getSupportActionBar().setTitle(" @" + owner.getScreenName());
-                ApplicationHelper.persistData(adapter.tweets);
-            }
-            @Override
-            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
-
-            }
-        });
     }
 
     @Override
