@@ -55,6 +55,7 @@ public class TwitterRestClient extends OAuthBaseClient {
 
             //add params
         RequestParams params = new RequestParams();
+
         params.put("count", 20);
 
         if (query != null) {
@@ -70,7 +71,7 @@ public class TwitterRestClient extends OAuthBaseClient {
         }
 
         if(max_id > 0) {
-            params.put("max_id", max_id);
+            params.put("max_id", max_id+1);
         }
 
         getClient().get(apiUrl, params, handler);
@@ -86,7 +87,7 @@ public class TwitterRestClient extends OAuthBaseClient {
             params.put("since_id", since_id);
         }
         if(max_id > 0) {
-            params.put("max_id", max_id);
+            params.put("max_id", max_id+1);
         }
         getClient().get(apiUrl, params, handler);
     }
@@ -110,7 +111,7 @@ public class TwitterRestClient extends OAuthBaseClient {
         }
 
         if(max_id > 0) {
-            params.put("max_id", max_id);
+            params.put("max_id", max_id+1);
         }
 
         getClient().get(apiUrl, params, handler);

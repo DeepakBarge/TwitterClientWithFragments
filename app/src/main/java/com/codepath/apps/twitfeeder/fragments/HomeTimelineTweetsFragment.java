@@ -105,7 +105,7 @@ public class HomeTimelineTweetsFragment extends Fragment implements ComposeNewTw
             adapter.notifyDataSetChanged();
 
         } else {
-            getTimeline(since_id, 0, REFRESH_OPERATION);
+            getTimeline(since_id, 0, null,  REFRESH_OPERATION);
         }
 
         setupScrollListener();
@@ -115,6 +115,10 @@ public class HomeTimelineTweetsFragment extends Fragment implements ComposeNewTw
         setupCustomListeners();
 
         return view;
+    }
+
+    public void searchTweets(String query){
+        //getTimeline(search_since_Id, search_);
     }
 
     @Override
@@ -143,9 +147,9 @@ public class HomeTimelineTweetsFragment extends Fragment implements ComposeNewTw
 
     }
 
-    public void getTimeline(final long sinceId, final long maxId, final int operation) {
+    public void getTimeline(final long sinceId, final long maxId, String query, final int operation) {
 
-        client.getHomeTimeline(sinceId, maxId, userID, null, new JsonHttpResponseHandler() {
+        client.getHomeTimeline(sinceId, maxId, userID, query, new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
 
@@ -217,7 +221,7 @@ public class HomeTimelineTweetsFragment extends Fragment implements ComposeNewTw
                 // Make sure you call swipeContainer.setRefreshing(false)
                 // once the network request has completed successfully.
                 Log.i("info", "refresh - new items needed " + since_id);
-                getTimeline(since_id, 0, REFRESH_OPERATION);
+                getTimeline(since_id, 0, null, REFRESH_OPERATION);
             }
         });
         // Configure the refreshing colors
@@ -235,7 +239,7 @@ public class HomeTimelineTweetsFragment extends Fragment implements ComposeNewTw
             @Override
             public void onLoadMore(int page, int totalItemsCount) {
                 Log.i("info", "scroll - new tweets needed " + since_id);
-                getTimeline(0, max_id, SCROLL_OPERATION);
+                getTimeline(0, max_id, null, SCROLL_OPERATION);
             }
         });
     }
@@ -370,7 +374,7 @@ public class HomeTimelineTweetsFragment extends Fragment implements ComposeNewTw
                 Log.i("info", "Successfully posted the tweet " + response.toString());
 
                 // refresh the timeline to get the new tweet
-                getTimeline(since_id, 0, REFRESH_OPERATION);
+                getTimeline(since_id, 0, null,  REFRESH_OPERATION);
                 ApplicationHelper.persistData(adapter.tweets);
             }
 

@@ -122,7 +122,7 @@ public class UserTimelineMediaFragment extends Fragment{
             adapter.notifyDataSetChanged();
 
         } else {
-            getTimeline(since_id, 0, REFRESH_OPERATION);
+            getTimeline(since_id, 0, null, REFRESH_OPERATION);
         }
 
         setupScrollListener();
@@ -159,9 +159,9 @@ public class UserTimelineMediaFragment extends Fragment{
 
     }
 
-    private void getTimeline(final long sinceId, final long maxId, final int operation) {
+    private void getTimeline(final long sinceId, final long maxId, String query, final int operation) {
 
-        client.getHomeTimeline(sinceId, maxId, userID, null, new JsonHttpResponseHandler() {
+        client.getHomeTimeline(sinceId, maxId, userID, query, new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
 
@@ -199,7 +199,7 @@ public class UserTimelineMediaFragment extends Fragment{
                         }
                         since_id = fetchedTweets.get(0).tweetId;
                         max_id = fetchedTweets.get(fetchedTweets.size() - 1).tweetId;
-                        ApplicationHelper.persistData(adapter.tweets);
+                        //ApplicationHelper.persistData(adapter.tweets);
 
                     }
                 } catch (Exception e) {
@@ -233,7 +233,7 @@ public class UserTimelineMediaFragment extends Fragment{
                 // Make sure you call swipeContainer.setRefreshing(false)
                 // once the network request has completed successfully.
                 Log.i("info", "refresh - new items needed " + since_id);
-                getTimeline(since_id, 0, REFRESH_OPERATION);
+                getTimeline(since_id, 0, null, REFRESH_OPERATION);
             }
         });
         // Configure the refreshing colors
@@ -251,7 +251,7 @@ public class UserTimelineMediaFragment extends Fragment{
             @Override
             public void onLoadMore(int page, int totalItemsCount) {
                 Log.i("info", "scroll - new tweets needed " + since_id);
-                getTimeline(0, max_id, SCROLL_OPERATION);
+                getTimeline(0, max_id, null, SCROLL_OPERATION);
             }
         });
     }

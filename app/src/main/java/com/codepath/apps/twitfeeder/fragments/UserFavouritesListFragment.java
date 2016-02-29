@@ -177,7 +177,7 @@ public class UserFavouritesListFragment extends Fragment implements ComposeNewTw
                         }
                         since_id = fetchedTweets.get(0).tweetId;
                         max_id = fetchedTweets.get(fetchedTweets.size() - 1).tweetId;
-                        ApplicationHelper.persistData(adapter.tweets);
+                        //ApplicationHelper.persistData(adapter.tweets);
 
                     }
                 } catch (Exception e) {
@@ -247,7 +247,7 @@ public class UserFavouritesListFragment extends Fragment implements ComposeNewTw
                         int fcount = adapter.tweets.get(position).getFavoritesCount();
                         adapter.tweets.get(position).setFavoritesCount(fcount - 1);
                         adapter.notifyItemChanged(position);
-                        ApplicationHelper.persistData(adapter.tweets);
+                        //ApplicationHelper.persistData(adapter.tweets);
 
                     }
 
@@ -269,7 +269,7 @@ public class UserFavouritesListFragment extends Fragment implements ComposeNewTw
                         int fcount = adapter.tweets.get(position).getFavoritesCount();
                         adapter.tweets.get(position).setFavoritesCount(fcount + 1);
                         adapter.notifyItemChanged(position);
-                        ApplicationHelper.persistData(adapter.tweets);
+                        //ApplicationHelper.persistData(adapter.tweets);
 
                     }
 
@@ -344,7 +344,7 @@ public class UserFavouritesListFragment extends Fragment implements ComposeNewTw
 
                 // refresh the timeline to get the new tweet
                 getTimeline(since_id, 0, REFRESH_OPERATION);
-                ApplicationHelper.persistData(adapter.tweets);
+                //ApplicationHelper.persistData(adapter.tweets);
             }
 
             @Override

@@ -61,7 +61,10 @@ public class UserProfileDetailsActivity extends AppCompatActivity {
     @Bind(R.id.followingCount) TextView mFollowingCount;
     @Bind(R.id.bAddUser) Button mAddUser;
 
-    public class UserProfilePagerAdapter extends FragmentPagerAdapter {
+    public class UserProfilePagerAdapter extends FragmentPagerAdapter implements PagerSlidingTabStrip.IconTabProvider {
+
+        private int tabIcons[] = {R.drawable.ic_tweets_tab, R.drawable.ic_photos_tab,
+                R.drawable.ic_favorite_tab, R.drawable.ic_followers_tab, R.drawable.ic_following_tab};
 
         String tabs [] = {"Tweets", "Photos", "Favourites", "Followers", "Following"};
 
@@ -130,6 +133,11 @@ public class UserProfileDetailsActivity extends AppCompatActivity {
             }
             //return (position == 0)? HomeTimelineTweetsFragment.newInstance(user.getUserId()) : UserTimelineMediaFragment.newInstance(user.getUserId()) ;
         }
+
+        @Override
+        public int getPageIconResId(int position) {
+            return tabIcons[position];
+        }
     }
 
 
@@ -192,9 +200,10 @@ public class UserProfileDetailsActivity extends AppCompatActivity {
         PagerSlidingTabStrip tabs = (PagerSlidingTabStrip) findViewById(R.id.tabs);
         tabs.setViewPager(pager);
 
-        tabs.setIndicatorHeight(6);
+        tabs.setIndicatorHeight(8);
         tabs.setIndicatorColor(0xFF55ACEE);
         tabs.setTextColor(0xFF55ACEE);
+        //tabs.setPadding(5,5,5,5);
 
         mAddUser.setVisibility(View.INVISIBLE);
 

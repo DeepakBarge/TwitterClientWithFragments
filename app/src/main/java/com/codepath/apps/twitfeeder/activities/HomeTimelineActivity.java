@@ -43,11 +43,13 @@ public class HomeTimelineActivity extends AppCompatActivity {
 
     private TwitterRestClient client;
 
-    public class HomeTimelinePagerAdapter extends SmartFragmentStatePagerAdapter {
+    public HomeTimelinePagerAdapter homeTimelinePagerAdapter;
+
+    public class HomeTimelinePagerAdapter extends SmartFragmentStatePagerAdapter implements PagerSlidingTabStrip.IconTabProvider {
 
         private String tabs [] = {"Home", "Mentions"};
 
-        //private int tabIcons[] = {R.drawable.ic_home_tab, R.drawable.ic_home_tab, R.drawable.ic_home_tab};
+        private int tabIcons[] = {R.drawable.ic_timeline_tab, R.drawable.ic_mention_tab};
 
         public HomeTimelinePagerAdapter(FragmentManager fm) {
             super(fm);
@@ -92,6 +94,10 @@ public class HomeTimelineActivity extends AppCompatActivity {
 
         }
 
+        @Override
+        public int getPageIconResId(int position) {
+            return tabIcons[position];
+        }
     }
 
     @Bind(R.id.toolbar) Toolbar toolbar;
@@ -107,7 +113,7 @@ public class HomeTimelineActivity extends AppCompatActivity {
 
         ViewPager pager = (ViewPager) findViewById(R.id.viewpager);
 
-        final HomeTimelinePagerAdapter homeTimelinePagerAdapter = new HomeTimelinePagerAdapter(getSupportFragmentManager());
+        homeTimelinePagerAdapter = new HomeTimelinePagerAdapter(getSupportFragmentManager());
         pager.setAdapter(homeTimelinePagerAdapter);
 
         // Bind the tabs to the ViewPager
@@ -128,7 +134,7 @@ public class HomeTimelineActivity extends AppCompatActivity {
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
 
-        fab.setImageResource(R.drawable.ic_action_composetweet_fab);
+        fab.setImageResource(R.drawable.ic_twitter_logo_hollow);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -155,8 +161,12 @@ public class HomeTimelineActivity extends AppCompatActivity {
             @Override
             public boolean onQueryTextSubmit(String query) {
 
-                client.searchTweets();
-                // search the tweets searchtweetsfragment.searchTweets();
+                HomeTimelineTweetsFragment temp = (HomeTimelineTweetsFragment) homeTimelinePagerAdapter.getRegisteredFragment(0);
+
+                temp.searchTweets(query);
+
+                Log.i("info","query "+query);
+
                 return true;
             }
 

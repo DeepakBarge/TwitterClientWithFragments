@@ -185,7 +185,7 @@ public class MentionsTimelineTweetsFragment extends Fragment{
                         }
                         since_id = fetchedTweets.get(0).tweetId;
                         max_id = fetchedTweets.get(fetchedTweets.size() - 1).tweetId;
-                        ApplicationHelper.persistData(adapter.tweets);
+                        //ApplicationHelper.persistData(adapter.tweets);
 
                     }
                 } catch (Exception e) {
@@ -255,7 +255,7 @@ public class MentionsTimelineTweetsFragment extends Fragment{
                         int fcount = adapter.tweets.get(position).getFavoritesCount();
                         adapter.tweets.get(position).setFavoritesCount(fcount - 1);
                         adapter.notifyItemChanged(position);
-                        ApplicationHelper.persistData(adapter.tweets);
+                        //ApplicationHelper.persistData(adapter.tweets);
 
                     }
 
@@ -277,7 +277,7 @@ public class MentionsTimelineTweetsFragment extends Fragment{
                         int fcount = adapter.tweets.get(position).getFavoritesCount();
                         adapter.tweets.get(position).setFavoritesCount(fcount + 1);
                         adapter.notifyItemChanged(position);
-                        ApplicationHelper.persistData(adapter.tweets);
+                        //ApplicationHelper.persistData(adapter.tweets);
 
                     }
 
